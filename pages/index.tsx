@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { AudioRecorder } from "react-audio-voice-recorder";
 import axios from "axios";
+import { log } from "console";
 
 interface DataReceive {
   text: string;
@@ -8,10 +9,12 @@ interface DataReceive {
   mapsLink: string;
 }
 
+
 const A = () => {
   const [message, setMessage] = useState<DataReceive>();
   const [loading, setLoading] = useState<boolean>(false);
   const [location, setLocation] = useState<{ latitude: number; longitude: number } | null>(null);
+  const [responseData, setResponseData] = useState<any>();
 
   const addAudioElement = async (blob: Blob) => {
     try {
@@ -34,13 +37,20 @@ const A = () => {
       setLoading(false);
       setMessage(posting.data);
 
-      console.log(posting)
+      try {
+        if (posting.data.encoded_text && posting.data.mapsLink) {
+          const encodedText = posting.data.encoded_text;
+          const mapsLink = encodeURIComponent(posting.data.mapsLink);
 
-      if (posting.data.encoded_text && posting.data.mapsLink) {
-        const encodedText = posting.data.encoded_text;
-        const mapsLink = encodeURIComponent(posting.data.mapsLink);
-        await axios.get(`http://localhost:8000/mitigasi/?msg=${encodedText}&lokasi=${mapsLink}`);
+          const response = await axios.get(`http://localhost:8000/mitigasi/?msg=${encodedText}&lokasi=${mapsLink}`);
+
+          setResponseData(response)
+
+        }
+      } catch (error) {
+        console.error(error);
       }
+
     } catch (err) {
       console.log(err);
     }
@@ -91,13 +101,28 @@ const A = () => {
                 </div>
               </div>
             ) : null}
-            {message?.text && message?.text.length > 0 ? (
-              <div className="w-full flex justify-start">
-                <div className="bg-gray-100 w-fit rounded-lg ">
-                  <p className="w-52 h-fit p-2 text-black">{`${message.status}`}</p>
-                </div>
-              </div>
-            ) : null}
+            {
+              responseData?.data?.status !== undefined ? (
+                responseData.data.status === 'kosong' ? (
+                  <div className="w-full flex justify-start">
+                    <div className="bg-gray-100 w-fit rounded-lg">
+                      <p className="w-52 h-fit p-2 text-black">
+                        Mohon maaf laporan anda tidak terkait kebencanaan sehingga kami tidak tindak lanjuti
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="w-full flex justify-start">
+                    <div className="bg-gray-100 w-fit rounded-lg">
+                      <p className="w-52 h-fit p-2 text-black">
+                        Selamat pelaporan anda telah kami teruskan, mohon untuk menunggu bantuan yang akan datang.
+                      </p>
+                    </div>
+                  </div>
+                )
+              ) : null
+            }
+
           </div>
           <div className="h-44">
             {loading ? (
