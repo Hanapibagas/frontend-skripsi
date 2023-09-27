@@ -5,8 +5,8 @@ export interface SavedSession {
 }
 
 export const sessionOptions: IronSessionOptions = {
-  password: process.env.SECRET_COOKIE_PASSWORD as string,
-  cookieName: "fanvercel/sess",
+  password: "qwertyuioplkjhgfdsazxcvbnmnbvcxz",
+  cookieName: "cookieName",
   cookieOptions: {
     secure: process.env.NODE_ENV === "production",
   },

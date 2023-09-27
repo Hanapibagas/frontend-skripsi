@@ -2,6 +2,7 @@ import { useRouter } from "next/router";
 import React, { useState, useEffect } from "react";
 import { AudioRecorder } from "react-audio-voice-recorder";
 import axios from "axios";
+import { log } from "console";
 
 interface DataReceive {
   text: string;
@@ -11,7 +12,7 @@ interface DataReceive {
 }
 
 const A = () => {
-  const router = useRouter();
+  const router = useRouter()
   const [message, setMessage] = useState<DataReceive>();
   const [loading, setLoading] = useState<boolean>(false);
   const [location, setLocation] = useState<{ latitude: number; longitude: number } | null>(null);
@@ -42,28 +43,17 @@ const A = () => {
         if (posting.data.encoded_text && posting.data.mapsLink && posting.data.nama_pengirim) {
           const encodedText = posting.data.encoded_text;
           const mapsLink = encodeURIComponent(posting.data.mapsLink);
-          const namaPengirim = encodeURIComponent(posting.data.nama_pengirim);
+          const namPengirim = encodeURIComponent(posting.data.nama_pengirim);
 
-          const response = await axios.get(`http://localhost:8000/mitigasi/?msg=${encodedText}&lokasi=${mapsLink}&nama=${namaPengirim}`);
+          const response = await axios.get(`http://localhost:8000/mitigasi/?msg=${encodedText}&lokasi=${mapsLink}&nama=${namPengirim}`);
 
-          setResponseData(response);
+          setResponseData(response)
 
-          const kelas = response.data.status;
-
-          const laporanData = {
-            nama_laporan: posting.data.nama_pengirim,
-            isi_laporan: posting.data.text,
-            kelas: kelas,
-            alamat: posting.data.mapsLink
-          };
-
-          const tambahLaporanResponse = await axios.post("http://127.0.0.1:5000/api/laporan", laporanData);
-          console.log("Data Laporan berhasil ditambahkan:", tambahLaporanResponse.data);
         }
-
       } catch (error) {
         console.error(error);
       }
+
     } catch (err) {
       console.log(err);
     }
@@ -155,6 +145,7 @@ const A = () => {
                 )
               ) : null
             }
+
           </div>
           <div className="h-44">
             {loading ? (

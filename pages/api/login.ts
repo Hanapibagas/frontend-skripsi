@@ -6,13 +6,11 @@ import { sessionOptions } from "../../lib/session";
 export default withIronSessionApiRoute(
   async (req: NextApiRequest, res: NextApiResponse) => {
     try {
-      if (!req.body.username || !req.body.password)
-        return res.status(400).json({
-          message: "Unauthorized",
-        });
-
       if (req.body.method === "logout") {
-        return req.session.destroy();
+        req.session.destroy();
+        return res.status(200).json({
+          message: "logout",
+        });
       }
 
       const saveSess = async (r: IronSessionData) => {
@@ -22,26 +20,26 @@ export default withIronSessionApiRoute(
         await req.session.save();
       };
 
-      const resx = await fetch("API", {
+      const resx = await fetch("http://127.0.0.1:5000/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          username: req.body.username,
+          email: req.body.email,
           password: req.body.password,
         }),
       });
 
-      // if (resx?.token?.accessToken && resx?.token?.refreshToken) {
-      //   await saveSess({
-      //     user: {
-      //       token
+      const result = await resx.json()
+      console.log(result)
 
-      //     },
-      //   });
-      //   return res.status(200).json(resx);
-      // }
+      await saveSess({
+        user: {
+          token: result.token,
+        },
+      });
+      return res.status(200).json({ status: "LOGGED" });
     } catch (e) {
       return res.status(400).json({
         message: e,

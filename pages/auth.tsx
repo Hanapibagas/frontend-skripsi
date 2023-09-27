@@ -1,21 +1,22 @@
+import { useRouter } from "next/router";
 import axios from "axios";
 import { useForm, Controller } from "react-hook-form";
 
 type AuthForm = {
-  username: string;
+  email: string;
   password: string;
 };
 
 const Auth = () => {
+  const router = useRouter()
   const { control, handleSubmit } = useForm<AuthForm>();
 
   const onSubmit = handleSubmit(async (data: AuthForm) => {
-    return console.log(data);
     try {
       const rr = await axios.post(
-        "",
+        "/api/login",
         {
-          username: data.username,
+          email: data.email,
           password: data.password,
         },
         {
@@ -24,6 +25,7 @@ const Auth = () => {
           },
         }
       );
+      router.replace("/")
     } catch (error) {
       alert("Something went wrong");
     }
@@ -34,14 +36,14 @@ const Auth = () => {
       <form className="w-2/4" onSubmit={onSubmit}>
         <Controller
           control={control}
-          name="username"
+          name="email"
           render={({ field }) => (
             <div className="grid grid-rows-2 w-full items-center">
               <label className="text-xs font-semibold text-gray-600 p-1">
-                USERNAME
+                Email
               </label>
               <input
-                placeholder="username"
+                placeholder="useremail"
                 type="username"
                 className="w-full disabled:bg-gray-100 text-black duration-500 rounded-md outline-teal-500 border-gray-200 shadow-sm sm:text-sm p-2 border"
                 {...field}

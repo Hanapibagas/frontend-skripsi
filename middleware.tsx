@@ -1,8 +1,8 @@
-export const runtime = "experimental-edge"; //choose the runtime "nodejs" | "experimental-edge"
+export const runtime = "experimental-edge";
 
 import { NextResponse, type NextRequest, NextMiddleware } from "next/server";
 import { getIronSession } from "iron-session/edge";
-import { sessionOptions } from "../lib/session";
+import { sessionOptions } from "./lib/session";
 
 export async function middleware(request: NextRequest, next: NextMiddleware) {
   const path = request.nextUrl.pathname;
@@ -17,3 +17,7 @@ export async function middleware(request: NextRequest, next: NextMiddleware) {
     return NextResponse.redirect(new URL("/auth", request.url));
   }
 }
+
+export const config = {
+  matcher: ["/", "/auth"],
+};

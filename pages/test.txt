@@ -42,25 +42,24 @@ const A = () => {
         if (posting.data.encoded_text && posting.data.mapsLink && posting.data.nama_pengirim) {
           const encodedText = posting.data.encoded_text;
           const mapsLink = encodeURIComponent(posting.data.mapsLink);
-          const namaPengirim = encodeURIComponent(posting.data.nama_pengirim);
+          const namPengirim = encodeURIComponent(posting.data.nama_pengirim);
 
-          const response = await axios.get(`http://localhost:8000/mitigasi/?msg=${encodedText}&lokasi=${mapsLink}&nama=${namaPengirim}`);
+          const response = await axios.get(`http://localhost:8000/mitigasi/?msg=${encodedText}&lokasi=${mapsLink}&nama=${namPengirim}`);
 
           setResponseData(response);
 
-          const kelas = response.data.status;
-
+          // Menambahkan data ke /api/laporan
           const laporanData = {
             nama_laporan: posting.data.nama_pengirim,
             isi_laporan: posting.data.text,
-            kelas: kelas,
-            alamat: posting.data.mapsLink
+            kelas: response.data.instansi,
+            latitude: response.data.latitude,
+            longitude: response.data.longitude,
           };
 
           const tambahLaporanResponse = await axios.post("http://127.0.0.1:5000/api/laporan", laporanData);
           console.log("Data Laporan berhasil ditambahkan:", tambahLaporanResponse.data);
         }
-
       } catch (error) {
         console.error(error);
       }
