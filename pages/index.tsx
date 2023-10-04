@@ -16,6 +16,7 @@ const A = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [location, setLocation] = useState<{ latitude: number; longitude: number } | null>(null);
   const [responseData, setResponseData] = useState<any>();
+  const [userText, setUserText] = useState("");
 
   const addAudioElement = async (blob: Blob) => {
     try {
@@ -66,6 +67,39 @@ const A = () => {
       }
     } catch (err) {
       console.log(err);
+    }
+  };
+
+  const handleTextSubmit = async () => {
+    try {
+      setLoading(true);
+
+      const encodedUserText = btoa(userText);
+      const locationUrl = location ? `https://www.google.com/maps?q=${encodeURIComponent(location.latitude + ',' + location.longitude)}` : "";
+
+      const url = `http://localhost:8000/mitigasi/?msg=${encodeURIComponent(encodedUserText)}&lokasi=${encodeURIComponent(locationUrl)}&nama=Aldisusasanto`;
+
+      const response = await axios.get(url);
+
+      setLoading(false);
+      setResponseData(response);
+
+      console.log(response);
+
+      if (response.data.status) {
+        const kelas = response.data.status;
+        const laporanData = {
+          nama_laporan: "Aldisusasanto",
+          isi_laporan: userText,
+          kelas: kelas,
+          alamat: locationUrl,
+        };
+
+        const tambahLaporanResponse = await axios.post("http://127.0.0.1:5000/api/laporan", laporanData);
+        console.log("Data Laporan berhasil ditambahkan:", tambahLaporanResponse.data);
+      }
+    } catch (error) {
+      console.error(error);
     }
   };
 
@@ -156,28 +190,47 @@ const A = () => {
               ) : null
             }
           </div>
-          <div className="h-44">
-            {loading ? (
-              <div className="w-10 h-10 rounded-full border-r-2 animate-spin border-teal-500" />
-            ) : (
-              <AudioRecorder
-                classes={{
-                  AudioRecorderClass: "bg-white",
-                  AudioRecorderDiscardClass: "bg-white",
-                  AudioRecorderPauseResumeClass: "bg-white",
-                  AudioRecorderStartSaveClass: "bg-teal-500",
-                  AudioRecorderStatusClass: "bg-white",
-                  AudioRecorderTimerClass: "bg-white",
-                }}
-                onRecordingComplete={addAudioElement}
-                audioTrackConstraints={{
-                  noiseSuppression: true,
-                  echoCancellation: true,
-                }}
-                showVisualizer={true}
-                downloadFileExtension="webm"
-              />
-            )}
+          <div className="h-44 w-full">
+            <div className="flex flex-row px-8 gap-x-8">
+              <div className="w-full flex">
+                <input
+                  type="text"
+                  placeholder="Masukkan pesan Anda..."
+                  value={userText}
+                  onChange={(e) => setUserText(e.target.value)}
+                  className="w-full h-fit p-2 border rounded-lg text-black"
+                />
+                <button
+                  onClick={handleTextSubmit}
+                  className="ml-2 bg-teal-500 text-white px-4 py-2 rounded-lg"
+                >
+                  Kirim
+                </button>
+              </div>
+              <div>
+                {loading ? (
+                  <div className="w-10 h-10 rounded-full border-r-2 animate-spin border-teal-500" />
+                ) : (
+                  <AudioRecorder
+                    classes={{
+                      AudioRecorderClass: "bg-white",
+                      AudioRecorderDiscardClass: "bg-white",
+                      AudioRecorderPauseResumeClass: "bg-white",
+                      AudioRecorderStartSaveClass: "bg-teal-500",
+                      AudioRecorderStatusClass: "bg-white",
+                      AudioRecorderTimerClass: "bg-white",
+                    }}
+                    onRecordingComplete={addAudioElement}
+                    audioTrackConstraints={{
+                      noiseSuppression: true,
+                      echoCancellation: true,
+                    }}
+                    showVisualizer={true}
+                    downloadFileExtension="webm"
+                  />
+                )}
+              </div>
+            </div>
           </div>
         </div>
       </div>
